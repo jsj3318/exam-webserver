@@ -52,7 +52,7 @@ class SimpleHttpServerTest {
         log.debug("response:{}",response.body());
 
         //TODO#105 threadB 문자열이 포함되었는지 검증 합니다.
-
+        Assertions.assertEquals(true, response.body().contains("threadB"));
     }
 
     @Test
@@ -68,6 +68,7 @@ class SimpleHttpServerTest {
         log.debug("response:{}",response.body());
 
         //TODO#106 threadA 문자열이 포함되었는지 검증 합니다.
+        Assertions.assertEquals(true, response.body().contains("threadA"));
 
     }
 
@@ -75,31 +76,67 @@ class SimpleHttpServerTest {
     @Order(3)
     @DisplayName("status code : 200 ok")
     void request1() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#107 response.statusCode()인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+        log.debug("response:{}",response.statusCode());
+        //TODO#107 response.statusCode()인지 검증 합니다.
+        Assertions.assertEquals(200, response.statusCode());
     }
 
     @Test
     @Order(4)
     @DisplayName("response: hello java")
     void request2() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#108 response.body()에 'hello' or 'java' 문자열이 포함되는지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+        log.debug("response:{}",response.body());
+        //TODO#108 response.body()에 'hello' or 'java' 문자열이 포함되는지 검증 합니다.
+        Assertions.assertAll(
+                ()->Assertions.assertEquals(true, response.body().contains("hello")),
+                ()->Assertions.assertEquals(true, response.body().contains("java"))
+        );
     }
 
     @Test
     @Order(5)
     @DisplayName("content-type")
     void request3() throws URISyntaxException, IOException, InterruptedException {
-        //TODO#109 Content-Type header가 text/html 인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+        Optional<String> contentTypeOptional = response.headers().firstValue("Content-Type");
+        String actual = contentTypeOptional.get().toLowerCase();
+        log.debug("response:{}",actual);
+        //TODO#109 Content-Type header가 text/html 인지 검증 합니다.
+        Assertions.assertEquals(true, actual.contains("text/html"));
     }
 
     @Test
     @Order(6)
     @DisplayName("charset utf-8")
     void request4() throws URISyntaxException, IOException, InterruptedException {
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(String.format("http://localhost:%d",TEST_PORT)))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+        Optional<String> contentTypeOptional = response.headers().firstValue("Content-Type");
+        String actual = contentTypeOptional.get().toLowerCase();
+        log.debug("response:{}",actual);
         //TODO#110 charset이 utf-8인지 검증 합니다.
+        Assertions.assertEquals(true, actual.contains("charset=utf-8"));
 
     }
 
