@@ -57,7 +57,12 @@ class SimpleHttpServerTest {
         HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         log.debug("response:{}",response.body());
 
+
         //TODO#100 - response.statusCode() == 200 검증 합니다.
+
+        Assertions.assertEquals(
+                response.statusCode(), 200
+        );
 
     }
 
@@ -73,7 +78,8 @@ class SimpleHttpServerTest {
 
         //TODO#101 - response.body() 'hello' or 'java' 문자열이 포함되었는지 검증 합니다.
         Assertions.assertAll(
-
+                ()->Assertions.assertTrue(response.body().contains("hello")),
+                ()->Assertions.assertTrue(response.body().contains("sava"))
         );
     }
 
@@ -91,7 +97,7 @@ class SimpleHttpServerTest {
         log.debug("contentType:{}",actual);
 
         //TODO#102 contentType이 'text/html' 검증 합니다.
-
+        Assertions.assertTrue(actual.contains("text/html"));
 
     }
 
@@ -109,7 +115,7 @@ class SimpleHttpServerTest {
         log.debug("contentType:{}",actual);
 
         //TODO#103 contentType header의 charset=utf-8 인지 검증 합니다.
-
+        Assertions.assertTrue(actual.contains("charset=utf-8"));
     }
 
 
@@ -128,7 +134,7 @@ class SimpleHttpServerTest {
         log.debug("Content-Length:{}",actual);
 
         //TODO#104 content-Length 값이 존재 하는지 검증 합니다.
-
+        Assertions.assertTrue(Integer.parseInt(actual) > 0);
     }
 
 
