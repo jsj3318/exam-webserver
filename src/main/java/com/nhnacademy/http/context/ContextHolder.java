@@ -12,8 +12,7 @@
 
 package com.nhnacademy.http.context;
 
-//TODO#3 - Context에 접근할 수 있도록 ContextHolder를 Singleton 구현 합니다.
-//즉 Context가 web server 내에서 공유 됩니다.
+//Context가 web server 내에서 공유 됩니다.
 
 public class ContextHolder {
     private static final Context context = new ApplicationContext();

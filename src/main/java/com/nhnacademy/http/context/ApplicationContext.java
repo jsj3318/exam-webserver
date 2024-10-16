@@ -18,8 +18,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-//TODO#2 - Context를 구현합니다.
-//Context에는 객체를 생성 후 등록 / 삭제 할 수 있습니다. 즉 공유할 수 있는 환경 입니다.
 public class ApplicationContext  implements Context {
     ConcurrentMap<String, Object> objectMap;
 

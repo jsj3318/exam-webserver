@@ -12,7 +12,6 @@
 
 package com.nhnacademy.http.context;
 
-//TODO#1 Context Interface 입니다.
 //Application이 구동되는 환경을 Context라고 합니다.
 public interface Context {
     //Object를 등록합니다.

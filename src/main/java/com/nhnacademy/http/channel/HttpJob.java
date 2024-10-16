@@ -58,15 +58,11 @@ public class HttpJob implements Executable {
         HttpService httpService = null;
         Context context = ContextHolder.getApplicationContext();
 
-        //TODO#7 requestURI()을 이용해서 Context에 등록된 HttpService를 실행 합니다.
-        //404에 대해서 대응할 수 있도록 코드를 작성 합니다.
         httpService = (HttpService) context.getAttribute(httpRequest.getRequestURI());
         if(httpService == null){
             httpService = (HttpService) context.getAttribute("/404.html");
         }
 
-        //TODO#8 httpService.service() 호출 합니다. 호출시 예외 Method Not Allowd 관련 Exception이 발생하면 httpService에 MethodNotAllowdService 객채의 service() method를 호출 합니다.
-        //405에 대응할 수 있도록 코드를 작성 합니다.
         try{
             httpService.service(httpRequest, httpResponse);
         }catch(RuntimeException e){

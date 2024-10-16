@@ -52,18 +52,12 @@ public class SimpleHttpServer {
         //workerThreadPool 초기화 합니다.
         workerThreadPool = new WorkerThreadPool(requestChannel);
 
-        /*TODO#4 Context에 HttpService Object 등록
-          - ex)  context.setAttribute("/index.html",new IndexHttpService());
-          - index.html, info.html, 404.html, 405.html 을 등록 합니다.
-        */
         Context context = ContextHolder.getApplicationContext();
         context.setAttribute("/index.html", new IndexHttpService());
         context.setAttribute("/info.html", new InfoHttpService());
         context.setAttribute("/404.html", new NotFoundHttpService());
         context.setAttribute("/405.html", new MethodNotAllowedService());
 
-        /*TODO#5 Counter 구현을 위해서 CounterUtils.CONTEXT_COUNTER_NAME 으로, 0l 을 context에 등록 합니다.
-         */
         context.setAttribute(CounterUtils.CONTEXT_COUNTER_NAME, 0l);
 
     }
