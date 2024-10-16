@@ -15,7 +15,9 @@ package com.nhnacademy.http.context;
 import com.nhnacademy.http.context.exception.ObjectNotFoundException;
 import com.nhnacademy.http.service.IndexHttpService;
 import com.nhnacademy.http.service.InfoHttpService;
+import com.nhnacademy.http.util.CounterUtils;
 import org.junit.jupiter.api.*;
+import org.w3c.dom.css.Counter;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ApplicationContextTest {
@@ -24,7 +26,7 @@ class ApplicationContextTest {
         Context context = ContextHolder.getApplicationContext();
         //TODO#101 context에 indexHttpService를 등록 합니다.
         //name : indexHttpService, object: new IndexHttpService()
-
+        context.setAttribute("indexHttpService", new IndexHttpService());
     }
 
     @Test
@@ -34,7 +36,7 @@ class ApplicationContextTest {
         context.setAttribute("name",new Object());
 
         //TODO#102 context에 "name"에 해당되는 객체가 존재하는지 검증 합니다.
-
+        Assertions.assertNotNull(context.getAttribute("name"));
     }
 
     @Test
@@ -46,6 +48,9 @@ class ApplicationContextTest {
         //TODO#103 context에 다음과 같이 null Object를 동록시 IllegalArgumentException이 발생하는지 검증 합니다.
         // - context.setAttribute("something",null);
 
+        Assertions.assertThrows(IllegalArgumentException.class, ()->{
+            context.setAttribute("something", null);
+        });
     }
 
     @Test
@@ -58,6 +63,9 @@ class ApplicationContextTest {
 
         //TODO#104 name에 해당되는 객체를 remove 했습니다. name에 해당되는 객체를 다음과 같이 context로 부터 획득하려고 할 때 ObjectNotFoundException이 발생하는지 검증 합니다.
         // - context.getAttribute(name);
+        Assertions.assertThrows(ObjectNotFoundException.class, ()->{
+           context.getAttribute(name);
+        });
 
     }
 
@@ -65,8 +73,21 @@ class ApplicationContextTest {
     @Order(4)
     @DisplayName("removeAttribute name is {null or empty}")
     void removeAttribute2() {
-        //TODO#105 context.removeAttribute(""); or context.removeAttribute(null); 실행할 때  IllegalArgumentException 발생하는지 검증 합니다.
 
+        Context context = ContextHolder.getApplicationContext();
+        //TODO#105 context.removeAttribute(""); or context.removeAttribute(null); 실행할 때  IllegalArgumentException 발생하는지 검증 합니다.
+        Assertions.assertAll(
+                ()->{
+                    Assertions.assertThrows(IllegalArgumentException.class, ()->{
+                        context.removeAttribute("");
+                    });
+                },
+                ()->{
+                    Assertions.assertThrows(IllegalArgumentException.class, ()->{
+                        context.removeAttribute(null);
+                    });
+                }
+        );
     }
 
     @Test
@@ -96,7 +117,18 @@ class ApplicationContextTest {
         //TODO#106 getAttribute를 다음과 같이 호출할 때 IllegalArgumentException Exception이 발생하는지 검증하세요
         // - context.getAttribute(null);
         // - context.getAttribute("");
-
+        Assertions.assertAll(
+                ()->{
+                    Assertions.assertThrows(IllegalArgumentException.class, ()->{
+                        context.getAttribute("");
+                    });
+                },
+                ()->{
+                    Assertions.assertThrows(IllegalArgumentException.class, ()->{
+                        context.getAttribute(null);
+                    });
+                }
+        );
     }
 
     @Test
@@ -105,7 +137,8 @@ class ApplicationContextTest {
     void sharedContextHolder() throws InterruptedException {
         Thread thread1 = new Thread(()->{
             //TODO#107 thread내에서 context에 counter 값을 10으로 설정 합니다.
-            Context context = null;
+            Context context = ContextHolder.getApplicationContext();
+            context.setAttribute("counter", 10);
         });
 
         thread1.start();
@@ -113,7 +146,10 @@ class ApplicationContextTest {
 
         Thread thread2 = new Thread(()->{
             //TODO#108 thread내에서 context에 counter = counter+1 후  context에 재 할당 합니다.
-            Context context = null;
+            Context context = ContextHolder.getApplicationContext();
+            int count = (int) context.getAttribute("counter");
+            count++;
+            context.setAttribute("counter", count);
         });
 
         thread2.start();

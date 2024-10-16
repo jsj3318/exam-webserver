@@ -34,7 +34,7 @@ public class IndexHttpService implements HttpService{
             responseBody = ResponseUtils.tryGetBodyFromFile(httpRequest.getRequestURI());
             //TODO#9 CounterUtils.increaseAndGet()를 이용해서 context에 있는 counter 값을 증가시키고, 반환되는 값을 index.html에 반영 합니다.
             //${count} <-- counter 값을 치환 합니다.
-            responseBody = null;
+            responseBody = responseBody.replace("${count}", String.valueOf(CounterUtils.increaseAndGet()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

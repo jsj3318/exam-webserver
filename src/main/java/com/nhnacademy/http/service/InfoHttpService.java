@@ -51,7 +51,7 @@ public class InfoHttpService implements HttpService {
 
         //TODO#10 CounterUtils.increaseAndGet()를 이용해서 context에 있는 counter 값을 증가시키고, 반환되는 값을 info.html에 반영 합니다.
         // ${count} <-- counter 값을 치환 합니다.
-        responseBody = null;
+        responseBody = responseBody.replace("${count}", String.valueOf(CounterUtils.increaseAndGet()));
 
         //Header-설정
         String responseHeader = ResponseUtils.createResponseHeader(200,"UTF-8",responseBody.getBytes().length);
