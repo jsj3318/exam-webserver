@@ -71,7 +71,12 @@ class MethodNotAllowedServiceTest {
         //TODO#106- response 검증, httpStatuscode: 405, description: Method Not Allowed 검증 합니다.
 
         Assertions.assertAll(
-
+                ()->{
+                    Assertions.assertTrue(response.contains("405"));
+                },
+                ()->{
+                    Assertions.assertTrue(response.contains("Method Not Allowed"));
+                }
         );
     }
 }

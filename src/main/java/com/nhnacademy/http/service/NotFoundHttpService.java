@@ -32,12 +32,20 @@ public class NotFoundHttpService implements HttpService{
         //Body-설정
         String responseBody = null;
 
+        try {
+            responseBody = ResponseUtils.tryGetBodyFromFile("/404.html");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         //Header-설정
-        String responseHeader = null;
+        String responseHeader = ResponseUtils.createResponseHeader(404, httpResponse.getCharacterEncoding(), responseBody.length());
 
         //PrintWriter 응답
-        try(PrintWriter bufferedWriter = null;){
-
+        try(PrintWriter bufferedWriter = httpResponse.getWriter();){
+            bufferedWriter.write(responseHeader);
+            bufferedWriter.write(responseBody);
+            bufferedWriter.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

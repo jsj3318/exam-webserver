@@ -54,13 +54,25 @@ public class MethodNotAllowedIntegrationTest {
         log.debug("response:{}",response.body());
 
         //TODO#107- response.statusCode() ==  405 검증 합니다.
-
+        Assertions.assertEquals(405, response.statusCode());
     }
     @Test
     @DisplayName("doPost : 405 method not allowed , /info.html")
     void doPost2() throws URISyntaxException, IOException, InterruptedException {
         //TODO#108 - /info.html은 doGet 구현 되어있습니다. POST 요청을 했을 때 response.statusCode() == 405인지 검증 합니다.
+        HttpClient httpClient = HttpClient.newHttpClient();
+        String url = String.format("http://localhost:%d/info.html",TEST_PORT);
+        log.debug("url:{}",url);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(url))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
 
+        HttpResponse<String> response = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
+
+        log.debug("response:{}",response.body());
+
+        Assertions.assertEquals(405, response.statusCode());
     }
 
     @AfterAll

@@ -28,17 +28,24 @@ public class IndexHttpService implements HttpService{
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-
-        //Body-설정
         String responseBody = null;
-        
+        //Body-설정
+        try {
+            responseBody = ResponseUtils.tryGetBodyFromFile(httpRequest.getRequestURI());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         //Header-설정
-        String responseHeader = null;
+        String responseHeader = ResponseUtils.createResponseHeader(200 , httpResponse.getCharacterEncoding(),responseBody.length() );
 
 
         //PrintWriter 응답
-        try(PrintWriter bufferedWriter = null){
-
+        try(PrintWriter bufferedWriter = httpResponse.getWriter()){
+            bufferedWriter.write(responseHeader);
+            bufferedWriter.write(responseBody);
+            bufferedWriter.flush();
+            log.debug("{}{}",responseHeader, responseBody);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
