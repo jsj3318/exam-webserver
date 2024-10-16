@@ -21,7 +21,7 @@
   <version>1.0-SNAPSHOT</version>
 
   <name>simple-web-server</name>
-  <url>http://github.com/nhnacademy-bootcamp</url>
+  <url>https://github.com/jsj3318/exam-webserver</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
