@@ -39,7 +39,7 @@ public class IndexHttpService implements HttpService{
         }
 
         //Header-설정
-        String responseHeader = ResponseUtils.createResponseHeader(200,"UTF-8",responseBody.length());
+        String responseHeader = ResponseUtils.createResponseHeader(200,"UTF-8",responseBody.toString().getBytes().length);
 
         //PrintWriter 응답
         try(PrintWriter bufferedWriter = httpResponse.getWriter();){
