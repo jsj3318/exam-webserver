@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CRL;
 import java.util.Objects;
 
@@ -97,7 +98,7 @@ public class SimpleHttpServer {
                 StringBuilder responseBody = new StringBuilder();
                 responseBody.append("<html>");
                 responseBody.append("   <body>");
-                responseBody.append("       <h1>hello sava</h1>");
+                responseBody.append("       <h1>안녕하세요 sava</h1>");
                 responseBody.append("   </body>");
                 responseBody.append("</html>");
 
@@ -116,7 +117,7 @@ public class SimpleHttpServer {
                 responseHeader.append("Connection: closed" + CRLF);
 
                 //TODO#13 responseBody의  Content-Length를 설정 합니다.
-                responseHeader.append("Content-Length: " + responseBody.length() + CRLF);
+                responseHeader.append("Content-Length: " + responseBody.toString().getBytes().length + CRLF);
 
                 //TODO#14 write Response Header
                 bufferedWriter.write(responseHeader + CRLF);
