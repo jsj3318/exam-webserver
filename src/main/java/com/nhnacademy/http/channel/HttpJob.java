@@ -22,6 +22,7 @@ import com.nhnacademy.http.response.HttpResponseImpl;
 import com.nhnacademy.http.service.HttpService;
 import com.nhnacademy.http.service.IndexHttpService;
 import com.nhnacademy.http.service.InfoHttpService;
+import com.nhnacademy.http.service.NotFoundHttpService;
 import com.nhnacademy.http.util.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +51,9 @@ public class HttpJob implements Executable {
 
     @Override
     public void execute(){
+        if(httpRequest.getRequestURI().equals("/favicon.ico")){
+            return;
+        }
 
         log.debug("method:{}", httpRequest.getMethod());
         log.debug("uri:{}", httpRequest.getRequestURI());
@@ -65,7 +69,7 @@ public class HttpJob implements Executable {
 
         try{
             httpService.service(httpRequest, httpResponse);
-        }catch(RuntimeException e){
+        }catch(ObjectNotFoundException e){
             httpService = (HttpService) context.getAttribute("/405.html");
             httpService.service(httpRequest, httpResponse);
         }

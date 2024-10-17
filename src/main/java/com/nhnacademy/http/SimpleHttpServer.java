@@ -16,10 +16,7 @@ import com.nhnacademy.http.channel.HttpJob;
 import com.nhnacademy.http.channel.RequestChannel;
 import com.nhnacademy.http.context.Context;
 import com.nhnacademy.http.context.ContextHolder;
-import com.nhnacademy.http.service.IndexHttpService;
-import com.nhnacademy.http.service.InfoHttpService;
-import com.nhnacademy.http.service.MethodNotAllowedService;
-import com.nhnacademy.http.service.NotFoundHttpService;
+import com.nhnacademy.http.service.*;
 import com.nhnacademy.http.util.CounterUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +54,8 @@ public class SimpleHttpServer {
         context.setAttribute("/info.html", new InfoHttpService());
         context.setAttribute("/404.html", new NotFoundHttpService());
         context.setAttribute("/405.html", new MethodNotAllowedService());
+
+        context.setAttribute("/register.html", new RegisterService());
 
         context.setAttribute(CounterUtils.CONTEXT_COUNTER_NAME, 0l);
 

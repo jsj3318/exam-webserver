@@ -14,7 +14,6 @@ package com.nhnacademy.http.service;
 
 import com.nhnacademy.http.request.HttpRequest;
 import com.nhnacademy.http.response.HttpResponse;
-import com.nhnacademy.http.util.CounterUtils;
 import com.nhnacademy.http.util.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,24 +21,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @Slf4j
-public class IndexHttpService implements HttpService{
-
+public class RegisterService implements HttpService {
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-
         //Body-설정
         String responseBody = null;
 
         try {
             responseBody = ResponseUtils.tryGetBodyFromFile(httpRequest.getRequestURI());
-            responseBody = responseBody.replace("${count}", String.valueOf(CounterUtils.increaseAndGet()));
-            responseBody = responseBody.replace("${userId}", httpRequest.getParameter("userId"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         //Header-설정
-        String responseHeader = ResponseUtils.createResponseHeader(200,"UTF-8",responseBody.length());
+        String responseHeader = ResponseUtils.createResponseHeader(200,"UTF-8",responseBody.getBytes().length);
 
         //PrintWriter 응답
         try(PrintWriter bufferedWriter = httpResponse.getWriter();){
@@ -50,6 +45,24 @@ public class IndexHttpService implements HttpService{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
+
+    @Override
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("HTTP/1.1 301 Moved Permanently\n");
+        builder.append(String.format("Location: http://localhost:8080/index.html?userId=%s \n", httpRequest.getParameter("userId")));
+
+        //PrintWriter 응답
+        try(PrintWriter bufferedWriter = httpResponse.getWriter();){
+            bufferedWriter.write(builder.toString());
+            bufferedWriter.flush();
+            log.debug("header:{}",builder.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
 }

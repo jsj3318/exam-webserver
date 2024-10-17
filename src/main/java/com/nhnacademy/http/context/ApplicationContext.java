@@ -28,6 +28,7 @@ public class ApplicationContext  implements Context {
 
     @Override
     public void setAttribute(String name, Object object) {
+        objectNameCheck(name);
         if(object == null){
             throw new IllegalArgumentException("null 값 들어옴");
         }
@@ -36,20 +37,23 @@ public class ApplicationContext  implements Context {
 
     @Override
     public void removeAttribute(String name) {
-        if(name == null || name.isBlank()){
-            throw new IllegalArgumentException();
-        }
+        objectNameCheck(name);
         objectMap.remove(name);
     }
 
     @Override
     public Object getAttribute(String name) {
-        if(name == null || name.isBlank()){
-            throw new IllegalArgumentException();
+        objectNameCheck(name);
+        Object object = objectMap.get(name);
+        if(object == null){
+            throw new ObjectNotFoundException(name + ": 존재하지 않는 컨텍스트");
         }
-        if(!objectMap.containsKey(name)){
-            throw new ObjectNotFoundException("존재하지 않는 컨텍스트");
+        return object;
+    }
+
+    private void objectNameCheck(String name){
+        if(Objects.isNull(name) || name.length()==0){
+            throw new IllegalArgumentException(name);
         }
-        return objectMap.get(name);
     }
 }

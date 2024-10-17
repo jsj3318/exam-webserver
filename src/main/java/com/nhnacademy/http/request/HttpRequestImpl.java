@@ -16,140 +16,173 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 public class HttpRequestImpl implements HttpRequest {
 
     private final Socket client;
+    private Map<String, Object> headerMap;
+    private Map<String, Object> attributeMap;
+    private final static String KEY_HTTP_METHOD = "HTTP_METHOD";
+    private final static String KEY_PARAM_MAP = "PARAM_MAP";
+    private final static String KEY_PATH = "PATH";
 
-    private final Map<String,Object> headerMap = new HashMap<>();
-    private final Map<String,Object> attributeMap = new HashMap<>();
-    private final static String KEY_HTTP_METHOD = "HTTP-METHOD";
-    private final static String KEY_QUERY_PARAM_MAP = "HTTP-QUERY-PARAM-MAP";
-    private final static String KEY_REQUEST_PATH="HTTP-REQUEST-PATH";
-    private final static String HEADER_DELIMER=":";
 
-    public HttpRequestImpl(Socket socket) {
-        this.client = socket;
-        initialize();
+    public HttpRequestImpl(Socket client) {
+        this.client = client;
+        headerMap = new HashMap<>();
+        attributeMap = new HashMap<>();
+
+        init();
     }
 
-    private void initialize() {
-
-        try{
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-
-            while (true) {
-                String line = bufferedReader.readLine();
-                log.debug("line:{}", line);
-
-                if (isFirstLine(line)) {
-                    parseHttpRequestInfo(line);
-                }else if (isEndLine(line)){
-                    break;
-                }else{
-                    parseHeader(line);
-                }
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-    }
     @Override
     public String getMethod() {
-        return String.valueOf(headerMap.get(KEY_HTTP_METHOD));
+        return (String)headerMap.get(KEY_HTTP_METHOD);
     }
+
     @Override
     public String getParameter(String name) {
-        return String.valueOf(getParameterMap().get(name));
+        return getParameterMap().get(name);
     }
 
     @Override
     public Map<String, String> getParameterMap() {
-        return (Map<String, String>) headerMap.get(KEY_QUERY_PARAM_MAP);
+        return (Map<String, String>) headerMap.get(KEY_PARAM_MAP);
     }
 
     @Override
     public String getHeader(String name) {
-        return String.valueOf(headerMap.get(name));
+        return (String)headerMap.get(name);
     }
+
     @Override
     public void setAttribute(String name, Object o) {
-        attributeMap.put(name,o);
+        attributeMap.put(name, o);
     }
+
     @Override
     public Object getAttribute(String name) {
         return attributeMap.get(name);
     }
+
     @Override
     public String getRequestURI() {
-        return String.valueOf(headerMap.get(KEY_REQUEST_PATH));
+        return (String)headerMap.get(KEY_PATH);
     }
 
-    private boolean isFirstLine(String line){
-        if(Objects.isNull(line)){
-            return false;
-        }
-        if( line.toUpperCase().indexOf("GET") > -1 || line.toUpperCase().indexOf("POST") > -1 ){
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isEndLine(String s){
-        return Objects.isNull(s) || s.equals("") ? true : false;
-    }
-
-    private void parseHeader(String s){
-        String[] hStr = s.split(HEADER_DELIMER);
-        String key = hStr[0].trim();
-        String value = hStr[1].trim();
-
-        if(Objects.nonNull(key) && key.length()>0) {
-            headerMap.put(key, value);
-        }
-    }
-
-    private void parseHttpRequestInfo(String s) {
-        String arr[] = s.split(" ");
-        //http method parse
-        if (arr.length > 0) {
-            headerMap.put(KEY_HTTP_METHOD, s.split(" ")[0]);
-        }
-        //query parameter parse
-        if (arr.length > 2) {
-            Map<String, String> queryMap = new HashMap<>();
-            int questionIndex = arr[1].indexOf("?");
-            String httpRequestPath;
-
-            if(questionIndex>0){
-                httpRequestPath = arr[1].substring(0, questionIndex);
-            }else{
-                httpRequestPath = arr[1];
-            }
-
-            String queryString = arr[1].substring(questionIndex + 1, arr[1].length());
-
-            if (Objects.nonNull(queryString) && !httpRequestPath.equals(queryString) ) {
-                String qarr[] = queryString.split("&");
-                for (String q : qarr) {
-                    String key = q.split("=")[0];
-                    String value = q.split("=")[1];
-                    log.debug("key:{},value={}", key, value);
-                    queryMap.put(key.trim(), value.trim());
+    private void init(){
+        try {
+            StringBuilder result = new StringBuilder();
+            do{
+                try{
+                    result.append((char) client.getInputStream().read());
+                }catch (IOException e){
+                    throw new RuntimeException(e);
                 }
+            }while(client.getInputStream().available() > 0);
+            log.debug("result: {}", result);
+
+            String[] lines = result.toString().split("\n");
+            int count=0;
+            for(int i=0; i<lines.length; i++){
+                String line = lines[i];
+
+                if(line == null || line.isBlank()){
+                    count++;
+                    continue;
+                }
+
+                if(i==0){
+                    //첫 줄 GET /index.html?id=marco&age=40&name=마르코 HTTP/1.1
+                    ParseFirstLine(line);
+                    continue;
+                }
+                if(getMethod().equals("POST") && count > 0){
+                    parseParams(line);
+                    break;
+                }
+                ParseHeader(line);
+
+
             }
 
-            //path 설정
-            headerMap.put(KEY_REQUEST_PATH, httpRequestPath);
 
-            //queryMap 설정
-            headerMap.put(KEY_QUERY_PARAM_MAP, queryMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+    }
+
+    private void ParseFirstLine(String line){
+        //첫 줄 GET /index.html?id=marco&age=40&name=마르코 HTTP/1.1
+        String[] splitLine = line.split(" ");
+
+        //메소드 넣기
+        headerMap.put(KEY_HTTP_METHOD, splitLine[0]);
+
+        //파라미터 맵 초기화
+        Map<String, String> paramMap = new HashMap<>();
+        headerMap.put(KEY_PARAM_MAP, paramMap);
+
+        //uri넣기
+        if(splitLine[1].contains("?")){
+            //파라미터 있을 경우
+            String[] strs = splitLine[1].split("\\?");
+            // /index.html
+            headerMap.put(KEY_PATH, strs[0]);
+
+            //파라미터 넣기
+            // id=marco&age=40&name=마르코
+            parseParams(strs[1]);
+
+        }
+        else{
+            //파라미터 없을 경우
+            headerMap.put(KEY_PATH, splitLine[1]);
+
+        }
+
+
+    }
+
+    private void ParseHeader(String line){
+        // Host: localhost:8080
+        String[] splitHeader = line.split(": ");
+
+        String key = splitHeader[0];
+        String value = splitHeader[1];
+
+        if(key.equals("Content-Type") && value.contains("charset")){
+            int index = value.indexOf("charset");
+            String charsetStr = value.substring(index);
+            ParseHeader(charsetStr.replace("=", ": "));
+        }
+
+        headerMap.put(splitHeader[0], splitHeader[1]);
+    }
+
+    private void parseParams(String line){
+        // line : userId=marco&userPassword=12345&userEemail=marco@nhnacademy.com
+        String[] params = line.split("&");
+
+        for(String param : params){
+            parseParam(param);
+        }
+    }
+
+    private void parseParam(String param){
+        String[] splitParam = param.split("=");
+        String key = splitParam[0];
+        String value = URLDecoder.decode(splitParam[1].trim(), StandardCharsets.UTF_8);
+
+        Map<String, String> paramMap = getParameterMap();
+        paramMap.put(key, value);
+        log.debug("param key: {}, value: {}", key, value);
     }
 
 }
