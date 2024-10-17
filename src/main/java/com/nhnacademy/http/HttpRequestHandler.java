@@ -103,6 +103,14 @@ public class HttpRequestHandler implements Runnable{
 
             }catch (IOException e){
                 log.error("socket error : {}",e);
+            } finally{
+                if(Objects.nonNull(client) && !client.isClosed()){
+                    try {
+                        client.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
     }
 }
